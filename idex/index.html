@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script id="MathJax-script" type="text/javascript" async
+          src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <title>CCTR</title>
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {inlineMath: [['$', '$'], ['\\(', '\\)']]},
+            "HTML-CSS": { availableFonts: ["TeX"] },
+            tex: { 
+                extensions: ["AMSmath.js", "AMSsymbols.js", "boldsymbol.js", "mhchem.js"]
+            }
+        });
+    </script>
+  
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            line-height: 1.6;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        img {
+            max-width: 100%;
+            max-height: 100%;
+            height: auto;
+            width: auto;
+        }
+
+        .roman-numeral {
+        font-family: 'Times New Roman', Times, serif; /* 使用罗马字体 */
+        font-size: 16px; /* 设置字体大小 */
+        }
+        .figure-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center; /* Center align items vertically */
+            margin: 20px 0;
+        }
+        header {
+            background-color: white;
+            padding: 30px 0;
+            color: white;
+            text-align: center;
+        }
+        h1 {
+            color: black;
+            font-size: 33px;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        section {
+            margin: 40px 0;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h2 {
+            color: #007BFF;
+            border-bottom: 2px solid #007BFF;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+        }
+        /* h3 {
+            color: #ea7909;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }  */
+        ul {
+            list-style-type: square;
+            margin-left: 20px;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            display: block;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+        figure {
+            margin: 20px 0;
+        }
+        figcaption {
+            color: #777;
+            font-style: italic;
+            text-align: center; /* 设置对齐方式为居中 */
+    /* 或者使用其他值，如 left（左对齐）、right（右对齐） */
+            font-size: 16px;
+        }
+        footer {
+            background-color: white;
+            padding: 20px 0;
+            color: white;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 style="white-space: pre-line;">
+            Beyond Visual Perception: Robust Chinese Text Recognition via Distilled Context Injection
+        </h1>
+        <div class="author">
+            Anonymous Author
+        </div>
+    </header>
+
+    <div class="container">
+        <section id="abstract">
+            <h2>1. Abstract</h2>
+            <!-- <span style="color: red;">red</span>  -->
+            <p> <p>Robust recognition of long Chinese text in the wild is fundamentally challenged by the dual shortcomings of vision-centric models: their susceptibility to visual distribution shifts (e.g., occlusion, blur) and their inherent inability to perform long-range contextual reasoning. To bridge this gap, we propose the Context-aware Chinese Text Recognition framework (CCTR), which embodies a "Seeing with Understanding" paradigm. Specifically, CCTR first distills long‑text reasoning from a large language model into a lightweight language model, and then injects the distilled semantic context into the vision module through dual cross‑modal attention mechanism. This injection dynamically calibrates visual perception with linguistic constraints at the distribution level, thereby steering the final logits from perception-driven to cognition-refined. This design confers two critical advantages: (1) it substantially enhances robustness against visual ambiguity by distilling long-text context from LLM to guide visual perception; (2) it effectively mitigates hallucination risks through a vision-prioritized cross-modal attention mechanism to ensure fidelity. To facilitate evaluation, we collect and curate Chinese Long Text in the Wild (CLTW), the first dataset dedicated to long Chinese text recognition in unconstrained scenarios. Extensive experiments demonstrate that CCTR outperforms existing methods on both standard benchmarks and the challenging CLTW dataset, validating the effectiveness of distilled context injection.
+                 </p>
+        </section>
+
+       
+        <section id="problem">
+            <h2>2. Problem Defination</h2>
+            <ul>
+                <li> <span style="color: green;"><u>(Introduction)</u></span>Long text character recognition poses greater challenges than short text due to increased blur, or occlusion as illustrated in Figure 1, yet most existing methods lack effective contextual modeling to fully leverage its rich semantics. This paper propose a context-aware Chinese text recognition framework (CCTR) by leveraging vision-language across attention and distilled an Large Language Model to enhance Chinese linguistic modeling.</li>
+                <div class="img" style="text-align:center">
+                    <img class="img_responsive" src="./CCTR/figure1.png" alt="challenges in text recognition" style="margin:auto;max-width:50%">
+                    <figcaption>Figure 1: Text recognition challenges in three scenarios: (a) Obstructed, (b) reflective, and (c) blurred conditions. Recognition errors (red) and ground truth (green) are shown, with quantitative error counts for each case.</figcaption>
+                </div>
+            
+                
+
+            </ul>
+        </section>
+    
+        <section id="framework">
+            <h2>3.Illustration of Our Framework</h2>
+            <p>
+                CCTR consists of three main components: a visual recognition module (CTC-based vision model), a language modeling module (pretrained language model) and a cross-modal semantic injection module. The vision model produces character-level prediction probability distributions, while the language model provides contextual priors. The semantic information is injected into the visual predictions via a dual cross-modal attention mechanism to generate the final prediction. Our framework can be illustrated in Figure 3.
+            </p>
+            <div class="img" style="text-align:center">
+                <img class="img_responsive" src="./CCTR/figure3.png" alt="framework" style="margin:auto;max-width:90%">
+                <figcaption>Figure 3: Overall architecture of CCTR. </figcaption>
+            </div>
+        </section>
+        <section id="method">
+            <h2>4. Method</h2>
+            <ul>
+                <li> <span style="color: green;"><u>(Context-Aware Semantic Distillation)</u></span> We present a knowledge distillation strategy that uses DeepSeek-R1-Distill-
+Qwen-32B as the teacher model to train a student model(Lightweight Language model). </li>
+                <div class="img" style="text-align:center">
+                    <img class="img_responsive" src="./CCTR/figure2.png" alt="challenges in text recognition" style="margin:auto;max-width:50%">
+                    <figcaption>Figure 2: Context-aware semantic distillation. The student
+                        distills long context knowledge by teacher-generated long
+                        text sequences. </figcaption>
+                </div>
+                <br>
+                <li> <span style="color: green;"><u>(Cross-Modal Semantic Injection)</u></span> The Cross-Modal Semantic Injection (CMSI) module integrates
+                    the distilled long-range semantic logits into the visual recognition
+                    pipeline. It consists of two cross-model attention mechanisms operating at the
+                    logit level to achieve a mutually grounding fusion of vision and
+                    semantics. he cross-modal semantic injection is for-
+                    mulated as follows:  </li>
+                    $$
+                    \text{Attn} =(\text{Attn}_{ep}+\text{Attn}_{pc}) /2,
+                    $$
+                    where
+                    $$
+                    \text{Attn}_{ep} = \text{Softmax}\left( \frac{\mathbf{Q}_l \mathbf{K}_v^\top}{\sqrt{d_k}}\right)\mathbf{V}_v,
+                    $$
+                    $$
+                    \text{Attn}_{pc} = \text{Softmax}\left( \frac{\mathbf{Q}_v \mathbf{K}_l^\top}{\sqrt{d_k}}\right)\mathbf{V}_v.
+                    $$
+                
+
+            </ul>
+        </section>
+
+
+        <!-- <section id="Theory">
+            <h2>4. Theoretical Analysis</h2>
+            <p> We propose a theoretical analysis to verify effectiveness of active query in constraint clustering. Simultaneously, the tight upper bound of generalization risk of PCL is given as well.</p>
+            <ul>
+                <li><span style="color: green;"><u>(<span class="roman-numeral">Subsection 3.4 & Appendix C</span>)</u></span> <span style="color: red;"><strong>Definition 4.1 (Unsupervised Loss.)</strong></span> 
+                <br>
+                We need to measure the effect of clustering by an unsupervised loss. If we can query $q$ times, the overall unsupervised loss is defined as:
+                    $$
+                    \hat{\mathcal{L}}_q(f) := \frac{1}{2N}\sum_{i=1}^{2N}\ell_i^{'}(f).
+                    $$
+                    and $\hat{f}_{q}$ is defined as $\arg \min_{f \in \mathcal{F}} \hat{\mathcal{L}}_{q}(f)$,$\quad q$ is the total num of query. The unsupervised population loss after $q$ queries is defined as:
+                    $$
+                        \mathcal{L}_q(f) := \mathbb{E}_{x \sim \mathcal{X}}[\hat{\mathcal{L}}_q(f)],
+                    $$
+                    and $f^{*}_{q}$ is defined as $\arg \min_{f \in \mathcal{F}} \mathcal{L}_{q}(f)$.
+                <br>
+                <li><span style="color: green;"><u>(<span class="roman-numeral">Subsection 3.4 & Appendix C</span>)</u></span> <span style="color: red;"><strong>Theorem 4.1 (Excess Risk)</strong></span> 
+                <br>
+                    Theorem 3.1 Suppose we can completely query each sample. We use $Q$ as the total number of queries. With probability at least $1-\delta$,
+                    $$
+                        |\mathcal{\hat{L}}_{Q}(\hat{f}_{Q}) - \mathcal{L}_{Q}(f^{*}_{Q}) | \leq \mathcal{O}(\frac{\eta \mathcal{R}_{\mathcal{S}}(\mathcal{F})}{N} + \sqrt{\frac{\log\frac{1}{\delta}}{N}}).
+                    $$
+                    where $\mathcal{R}_{\mathcal{S}}(\mathcal{F})$ is the Rademacher complexity of $\mathcal{F}$ with respect to training set $\mathcal{S}$, and $\eta$ is the Lipschitz constant.
+                    
+                    Theorem 3.1 indicates that $\mathcal{L}_{Q}(f^{*}_{Q})$ can be well bounded if the trained model $\hat{f}_{Q}$ is good.
+                    However, due to the limited queries (less than $Q$), we cannot calculate $\mathcal{\hat{L}}_{Q}(\hat{f}_{Q})$. As a compromise, can we get closer to it?
+                <br>
+                <span style="color: green;"><u>(<span class="roman-numeral">Subsection 3.4 & Appendix C</span>)</u></span> <span style="color: red;"><strong>Theorem 3.2 (Queries Reduce the Gap)</strong></span>
+                <br>
+                    We only consider adding one query. If $q \ll N$:
+                    $$
+                        |\mathcal{\hat{L}}_{q}(\hat{f}_{q}) - \mathcal{\hat{L}}_{Q}(\hat{f}_{Q})| \geq |\mathcal{\hat{L}}_{q+1}(\hat{f}_{q+1}) - \mathcal{\hat{L}}_{Q}(\hat{f}_{Q})|.
+                    $$
+                    
+                    This just matches the process of algorithm: 
+                    we initially make a new query request based on the existing model $\hat{f}_{q}$, 
+                    followed by updating $\mathcal{\hat{L}}_{q}$ to $\mathcal{\hat{L}}_{q+1}$ based on the query results, 
+                    and finally optimizing the loss to get $\hat{f}_{q+1}$. 
+                    Theorem 3.2 guarantees the gap between the loss of the current model and the complete queries loss will be reduced after each query. Now we show that our strategy is indeed effective.
+                <br>
+                <span style="color: green;"><u>(<span class="roman-numeral">Subsection 3.4 & Appendix C</span>)</u></span> <span style="color: red;"><strong>Theorem 3.3 (Query Strategy Is Effective)</strong></span>
+                <br>
+                    Suppose $q \ll N$, the sample pair $(\mathbf x_i, \mathbf x_j)$ is queried, and the result is cannot-link,  we have:
+                    $$
+                        |\mathcal{\hat{L}}_{q}(f) - \mathcal{\hat{L}}_{q+1}(f)| \propto  \mathcal \exp \left(\mathcal{S}_{up}(\mathbf x_i,\mathbf x_j)\right),
+                    $$
+                    and if the result is must-link, we have:
+                    $$
+                        |\mathcal{\hat{L}}_{q}(f) - \mathcal{\hat{L}}_{q+1}(f)| \propto \mathcal S_{up}(\mathbf x_i,\mathbf x_j).
+                    $$
+                    
+                    Since we want to reduce the gap in Theorem 3.2, we should equivalently maximize $|\mathcal{\hat{L}}_{q}(f) - \mathcal{\hat{L}}_{q+1}(f)|$ and then train the model according to $\mathcal{\hat{L}}_{q+1}$.
+                    Theorem 3.3 states that our query strategy is effective in this sense, 
+                    because when $q$ is small, $\mathcal{S}_{up}$ matters more in the scoring function.
+                    Besides, we have added $\mathcal{S}_{hp}$ in the score and weight it more if $q$ is larger, making our strategy more robust and efficient. 
+                    The following experiments have proved the effectiveness in practice.
+                <br>
+                </li>
+            </ul>
+        </section> -->
+
+        <section id="experiment-results">
+            <h2>4. Experiments</h2>
+            <ul>
+                <li>
+                    <span style="color: green;"><u>(Datasets)</u></span> We evaluate CCTR on two datasets with long text: the Chinese Long Text in the Wild (CLTW) and the Handwritten Chinese Text dataset(HW).
+                    For CLTW, an $8:2$ split is adopted for training and testing. Then, the models are tested on both CLTW and HW, including fourteen challenging subsets.
+                    To facilitate comparisons with LLM-based methods, we curate two specialized subsets from the CLTW data: an Over-confidence (OCF) set of 199 images and a Hallucination (HAL) set of 467 images. These subsets collectively account for approximately 10\% of the total data.
+<!-- 
+                    <div class="img" style="text-align:center">
+                        <img class="img_responsive" src="./assert/Figure5.png" alt="dataset1" style="margin:auto;max-width:100%">
+                        <figcaption>Table 1: A summary of the datasets.(待修改) </figcaption>
+                        
+                    </div> -->
+                </li>
+                <br>
+                <li>
+                    <span style="color: green;"><u>(Evaluation Index)</u></span>
+                    We evaluate model performance using six key metrics. Line-level metrics: Accuracy (Acc), Accuracy Rate (AR), Character Rate(CR), and their corresponding page-level metrics: Accuracy* (Acc*), Accuracy Rate* (AR*), Character Rate*(CR*)
+                    <br>
+                    <strong>Accuracy (Acc)</strong> measures the proportion of predictions that exactly match the ground-truth text.
+                    <br>
+                    <p><strong>CR</strong> : measures the proportion of correctly recognized characters, considering only deletions and substitutions.</p>
+<p><strong>AR</strong>: measures the proportion of correctly recognized characters while also accounting for insertion errors, providing a stricter evaluation of character-level recognition performance.</p>
+
+                <br>                
+                
+                <li>
+                    <span style="color: green;"><u>(Evalutions of CCTR)</u></span> We reports line-level Accuracy (ACC) for baseline method and our model across the nine CLTW subsets and hw dataset as shown in Table 1.
+                    <img class="img_responsive" src="./CCTR/Table 1.png" alt="evalutions of VLFM" style="display:block;margin: 0 auto;max-width:90%">
+                        
+                </li>
+                <br>
+
+                <li>
+                    <span style="color: green;"><u>(<span class="roman-numeral">Comparison with Large Model API Methods and LLM-based OCR Methods.</span>)</u></span> We compare CCTR with Large Model API methods and LLM-based OCR methods using SVTRv2 as the backbone, as shown in Table 2. Evaluation is based on AR* and CR*.
+                    <div class="img" style="text-align:center">
+                        <img class="img_responsive" src="./CCTR/Table 2.png" alt="comparison on public datasets" style="margin:auto;max-width:90%">
+        
+                    </div>
+                </li>
+                <br>
+
+                <li>
+                    <span style="color: green;"><u>(<span class="roman-numeral">Ablation Study</span>)</u></span>we conduct ablation analyses to
+                    validate the effectiveness of CCTR’s key components. We eval-
+                    uate the flexibility of the vision module by replacing the backbone
+                    and ablating the fusion module (CMSI). We also present Context-Aware Semantic Distillation is advantageous.
+                    <div class="img" style="text-align:center">
+                        <img class="img_responsive" src="./CCTR/Table 3.png" alt="comparison on public datasets" style="margin:auto;max-width:90%">
+                        <figcaption>Table 4: Ablation study of CCTR and CMSI. </figcaption>
+                    </div>
+                    <div class="img" style="text-align:center">
+                        <img class="img_responsive" src="./CCTR/Table 5.png" alt="comparison on public datasets" style="margin:auto;max-width:90%">
+                        <figcaption>Table 5: Performance comparison of language models under
+                            different masking ratios using Top-1 accuracy. </figcaption>
+                    </div>
+                </li>
+                <br>
+
+            </ul>
+        </section>
+
+        <section id="controbution">
+            <h2>5. Contribution</h2>
+            <ul>
+                <li>
+                    We propose CCTR, a novel framework that bridges visual recognition and semantic reasoning. Instead of direct feature fusion, CCTR exploits semantic context in the logit space, fundamentally enhancing robustness against visual ambiguities and the failure to capture long-range dependencies.</li>
+                
+                <li>
+                    To tackle real-world visual degradations, CCTR introduces a distilled semantic injection strategy that distills LLM’s long-range reasoning into a lightweight student, and leverages cross-modal attention to balance semantics and vision, resolving visual uncertainties while preventing semantic hallucinations. </li>
+        
+                <li>
+                    We introduce CLTW, the first large-scale dataset dedicated to long Chinese text recognition in the wild. Extensive experiments on the challenging CLTW dataset demonstrate that CCTR achieves state-of-the-art performance, particularly excelling in severely degraded or long-text scenarios.</li>
+               
+            </ul>
+        </section>
+
+        <section id="code">
+            <h2>6. Code</h2>
+            <p>
+                <strong>Appendix</strong> and <strong>code</strong> contains the relevant code required for the paper experiment in Supplementary Materials.
+            </p>
+        </section>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
